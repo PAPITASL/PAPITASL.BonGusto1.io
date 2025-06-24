@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BonGusto - Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>BonGusto</h2>
+                <p>Panel de Administración</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-menu="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Dashboard</span>
+                </button>
+                <button class="nav-item" data-menu="usuarios">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-label">Usuarios</span>
+                </button>
+                <button class="nav-item" data-menu="productos">
+                    <span class="nav-icon">🍕</span>
+                    <span class="nav-label">Productos</span>
+                </button>
+                <button class="nav-item" data-menu="pedidos">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-label">Pedidos</span>
+                </button>
+                <button class="nav-item" data-menu="reportes">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-label">Reportes</span>
+                </button>
+                <button class="nav-item" data-menu="configuracion">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-label">Configuración</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="logout-btn" onclick="handleLogout()">
+                    <span class="nav-icon">🚪</span>
+                    <span class="nav-label">Cerrar Sesión</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1 id="page-title">Dashboard</h1>
+                <div class="user-info">
+                    <span id="user-name">Administrador</span>
+                </div>
+            </header>
+            
+            <div class="content-main">
+                <!-- Dashboard Content -->
+                <div id="dashboard-content" class="dashboard-content">
+                    <div class="content-header-section">
+                        <h2>Resumen General</h2>
+                        <button id="dashboard-refresh-btn" class="refresh-btn" onclick="fetchUsuarios()">
+                            🔄 Actualizar
+                        </button>
+                    </div>
+
+                    <div id="dashboard-error-message" class="error-message" style="display: none;"></div>
+                    <div id="dashboard-loading-message" class="loading-message" style="display: none;">
+                        Cargando datos...
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Total Usuarios</h3>
+                            <div class="stat-value" id="total-usuarios">0</div>
+                            <div class="stat-change">+12% este mes</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Productos Activos</h3>
+                            <div class="stat-value">24</div>
+                            <div class="stat-change">+3 nuevos</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Pedidos Hoy</h3>
+                            <div class="stat-value">156</div>
+                            <div class="stat-change negative">-5% vs ayer</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Ingresos Mensuales</h3>
+                            <div class="stat-value">$12,450</div>
+                            <div class="stat-change">+8% vs mes anterior</div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h3>Distribución de Usuarios</h3>
+                            <canvas id="usuariosChart" class="chart-canvas"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3>Ventas por Día</h3>
+                            <canvas id="ventasChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="recent-activity">
+                        <h3>Actividad Reciente</h3>
+                        <ul class="activity-list">
+                            <li class="activity-item">
+                                <div class="activity-icon">👤</div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Nuevo usuario registrado</div>
+                                    <div class="activity-time">Hace 5 minutos</div>
+                                </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-icon">🍕</div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Nuevo producto agregado</div>
+                                    <div class="activity-time">Hace 1 hora</div>
+                                </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-icon">📋</div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Pedido completado #1234</div>
+                                    <div class="activity-time">Hace 2 horas</div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Usuarios Content -->
+                <div id="usuarios-content" class="dashboard-content" style="display: none;">
+                    <div class="content-header-section">
+                        <h2>Gestión de Usuarios</h2>
+                        <button id="usuarios-refresh-btn" class="refresh-btn" onclick="fetchUsuarios()">
+                            🔄 Actualizar
+                        </button>
+                    </div>
+                    
+                    <div id="usuarios-error-message" class="error-message" style="display: none;"></div>
+                    <div id="usuarios-loading-message" class="loading-message" style="display: none;">
+                        Cargando usuarios...
+                    </div>
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                            <thead>
+                            <tr style="background-color: #f5f5f5;">
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">ID</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Nombre</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Apellido</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Email</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Tipo</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Fecha</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usuarios-table-body">
+                            <!-- Los usuarios se cargarán dinámicamente aquí -->
+                            </tbody>
+                        </table>
+                </div>
+
+                <!-- Productos Content -->
+                <div id="productos-content" class="dashboard-content" style="display: none;">
+                    <div class="content-header-section">
+                    <h2>Gestión de Productos</h2>
+                        <button class="refresh-btn" onclick="alert('Función de actualizar productos')">
+                            🔄 Actualizar
+                        </button>
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                        <thead>
+                            <tr style="background-color: #f5f5f5;">
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">ID</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Nombre</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Categoría</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Precio</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Stock</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Estado</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">1</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Pizza Margherita</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Pizzas</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">$12.99</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">45</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;"><span style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px;">Activo</span></td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                                    <button style="background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 5px; cursor: pointer;">Editar</button>
+                                    <button style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Eliminar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">2</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Pizza Pepperoni</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Pizzas</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">$14.99</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">32</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;"><span style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px;">Activo</span></td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                                    <button style="background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 5px; cursor: pointer;">Editar</button>
+                                    <button style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Eliminar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">3</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Hamburguesa Clásica</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Hamburguesas</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">$9.99</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">28</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;"><span style="background: #ffc107; color: black; padding: 4px 8px; border-radius: 4px;">Bajo Stock</span></td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                                    <button style="background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 5px; cursor: pointer;">Editar</button>
+                                    <button style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Eliminar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">4</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Ensalada César</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Ensaladas</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">$8.50</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">15</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;"><span style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px;">Activo</span></td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                                    <button style="background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 5px; cursor: pointer;">Editar</button>
+                                    <button style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Eliminar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">5</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Coca Cola 500ml</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Bebidas</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">$2.50</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">120</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;"><span style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px;">Activo</span></td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                                    <button style="background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 5px; cursor: pointer;">Editar</button>
+                                    <button style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Eliminar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pedidos Content -->
+                <div id="pedidos-content" class="dashboard-content" style="display: none;">
+                    <div class="content-header-section">
+                    <h2>Gestión de Pedidos</h2>
+                        <button class="refresh-btn" onclick="alert('Función de actualizar pedidos')">
+                            🔄 Actualizar
+                        </button>
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                        <thead>
+                            <tr style="background-color: #f5f5f5;">
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">ID Pedido</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Cliente</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Productos</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Total</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Estado</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Fecha</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">#1234</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Juan Pérez</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Pizza Margherita, Coca Cola</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">$15.49</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;"><span style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px;">Entregado</span></td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">15/12/2024 19:30</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                                    <button style="background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 5px; cursor: pointer;">Ver</button>
+                                    <button style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Completar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">#1235</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">María García</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Hamburguesa Clásica, Ensalada</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">$18.49</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;"><span style="background: #ffc107; color: black; padding: 4px 8px; border-radius: 4px;">En Preparación</span></td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">15/12/2024 20:15</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                                    <button style="background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 5px; cursor: pointer;">Ver</button>
+                                    <button style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Completar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">#1236</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Carlos López</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Pizza Pepperoni x2</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">$29.98</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;"><span style="background: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px;">En Camino</span></td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">15/12/2024 20:45</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                                    <button style="background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 5px; cursor: pointer;">Ver</button>
+                                    <button style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Completar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">#1237</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Ana Rodríguez</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">Ensalada César, Agua</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">$11.00</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;"><span style="background: #6c757d; color: white; padding: 4px 8px; border-radius: 4px;">Pendiente</span></td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">15/12/2024 21:00</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                                    <button style="background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 5px; cursor: pointer;">Ver</button>
+                                    <button style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Completar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Reportes Content -->
+                <div id="reportes-content" class="dashboard-content" style="display: none;">
+                    <div class="content-header-section">
+                        <h2>Reportes y Estadísticas</h2>
+                        <button class="refresh-btn" onclick="alert('Generando reportes...')">
+                            📊 Generar Reporte
+                        </button>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Ventas del Mes</h3>
+                            <div class="stat-value">$45,230</div>
+                            <div class="stat-change">+15% vs mes anterior</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Pedidos Totales</h3>
+                            <div class="stat-value">1,247</div>
+                            <div class="stat-change">+8% vs mes anterior</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Producto Más Vendido</h3>
+                            <div class="stat-value">Pizza Pepperoni</div>
+                            <div class="stat-change">156 unidades</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Cliente Frecuente</h3>
+                            <div class="stat-value">María García</div>
+                            <div class="stat-change">23 pedidos</div>
+                        </div>
+                    </div>
+
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h3>Ventas por Día (Última Semana)</h3>
+                            <div style="height: 300px; display: flex; align-items: center; justify-content: center; background: #f9f9f9; border-radius: 8px;">
+                                <div style="text-align: center;">
+                                    <p><strong>Lun:</strong> $1,250 | <strong>Mar:</strong> $1,450</p>
+                                    <p><strong>Mié:</strong> $1,320 | <strong>Jue:</strong> $1,680</p>
+                                    <p><strong>Vie:</strong> $2,100 | <strong>Sáb:</strong> $2,450</p>
+                                    <p><strong>Dom:</strong> $1,980</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <h3>Productos por Categoría</h3>
+                            <div style="height: 300px; display: flex; align-items: center; justify-content: center; background: #f9f9f9; border-radius: 8px;">
+                                <div style="text-align: center;">
+                                    <p><strong>Pizzas:</strong> 45% de ventas</p>
+                                    <p><strong>Hamburguesas:</strong> 30% de ventas</p>
+                                    <p><strong>Ensaladas:</strong> 15% de ventas</p>
+                                    <p><strong>Bebidas:</strong> 10% de ventas</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuración Content -->
+                <div id="configuracion-content" class="dashboard-content" style="display: none;">
+                    <div class="content-header-section">
+                        <h2>Configuración del Sistema</h2>
+                        <button class="refresh-btn" onclick="alert('Configuración guardada')">
+                            💾 Guardar Cambios
+                        </button>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;">
+                        <div class="chart-container">
+                            <h3>Configuración General</h3>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Nombre del Restaurante:</label>
+                                <input type="text" value="BonGusto" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Email de Contacto:</label>
+                                <input type="email" value="info@bongusto.com" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Teléfono:</label>
+                                <input type="tel" value="+1 234 567 8900" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Horario de Atención:</label>
+                                <select style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option>10:00 AM - 10:00 PM</option>
+                                    <option>11:00 AM - 11:00 PM</option>
+                                    <option>12:00 PM - 12:00 AM</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="chart-container">
+                            <h3>Configuración de Notificaciones</h3>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: flex; align-items: center; margin-bottom: 10px;">
+                                    <input type="checkbox" checked style="margin-right: 10px;">
+                                    Notificaciones de nuevos pedidos
+                                </label>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: flex; align-items: center; margin-bottom: 10px;">
+                                    <input type="checkbox" checked style="margin-right: 10px;">
+                                    Alertas de stock bajo
+                                </label>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: flex; align-items: center; margin-bottom: 10px;">
+                                    <input type="checkbox" style="margin-right: 10px;">
+                                    Reportes automáticos diarios
+                                </label>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: flex; align-items: center; margin-bottom: 10px;">
+                                    <input type="checkbox" checked style="margin-right: 10px;">
+                                    Notificaciones de clientes
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container" style="margin-top: 30px;">
+                        <h3>Información del Sistema</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                            <div>
+                                <strong>Versión del Sistema:</strong> 2.1.0
+                            </div>
+                            <div>
+                                <strong>Última Actualización:</strong> 15/12/2024
+                            </div>
+                            <div>
+                                <strong>Base de Datos:</strong> MySQL 8.0
+                            </div>
+                            <div>
+                                <strong>Servidor:</strong> Apache 2.4
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </main>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
