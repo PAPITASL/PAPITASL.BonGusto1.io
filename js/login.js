@@ -89,6 +89,26 @@ async function handleSubmit(e) {
         return;
     }
 
+    // Validación especial para acceso directo
+    if (formData.email === 'bongusto@gmail.com' && formData.password === 'bongusto123') {
+        // Puedes guardar un usuario simulado en localStorage si lo deseas
+        localStorage.setItem('user', JSON.stringify({
+            email: 'bongusto@gmail.com',
+            tipo_usuario: 'administrador',
+            nombre: 'BonGusto'
+        }));
+        window.location.href = 'dashboard.html';
+        return;
+    }if (formData.email === 'bongustoem@gmail.com' && formData.password === 'empleado123') {
+        localStorage.setItem('user', JSON.stringify({
+            email: 'empleado@gmail.com',
+            tipo_usuario: 'empleado',
+            nombre: 'Empleado'
+        }));
+        window.location.href = 'empleado.html';
+        return; 
+    }
+
     try {
         const response = await fetch('https://01a5-200-118-60-102.ngrok-free.app/api/usuarios/login', {
             method: 'POST',

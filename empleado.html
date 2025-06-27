@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BonGusto - Panel de Empleados</title>
+    <link rel="stylesheet" href="css/empleado.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>BonGusto</h2>
+                <p>Panel de Empleados</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-menu="pedidos">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-label">Pedidos</span>
+                </button>
+                <button class="nav-item" data-menu="pagos">
+                    <span class="nav-icon">💳</span>
+                    <span class="nav-label">Pagos</span>
+                </button>
+                <button class="nav-item" data-menu="reservas">
+                    <span class="nav-icon">📅</span>
+                    <span class="nav-label">Reservas</span>
+                </button>
+                <button class="nav-item" data-menu="menu">
+                    <span class="nav-icon">🍽️</span>
+                    <span class="nav-label">Menú</span>
+                </button>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="logout-btn" onclick="handleLogout()">
+                    <span class="nav-icon">🚪</span>
+                    <span class="nav-label">Cerrar Sesión</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1 id="page-title">Pedidos</h1>
+                <div class="user-info">
+                    <span id="user-name">Empleado</span>
+                </div>
+            </header>
+
+            <div class="content-main">
+                <!-- Pedidos Content -->
+                <div id="pedidos-content" class="dashboard-content">
+                    <div class="content-header-section">
+                        <h2>Gestión de Pedidos</h2>
+                        <button id="pedidos-refresh-btn" class="refresh-btn" onclick="fetchPedidos()">
+                            🔄 Actualizar
+                        </button>
+                    </div>
+                    <div id="pedidos-error-message" class="error-message" style="display: none;"></div>
+                    <div id="pedidos-loading-message" class="loading-message" style="display: none;">
+                        Cargando pedidos...
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Pedido</th>
+                                <th>Cliente</th>
+                                <th>Productos</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pedidos-table-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- Pagos Content -->
+                <div id="pagos-content" class="dashboard-content" style="display: none;">
+                    <div class="content-header-section">
+                        <h2>Gestión Pagos</h2>
+                        <button id="pagos-refresh-btn" class="refresh-btn" onclick="fetchPagos()">
+                            🔄 Actualizar
+                        </button>
+                    </div>
+                    <div id="pagos-error-message" class="error-message" style="display: none;"></div>
+                    <div id="pagos-loading-message" class="loading-message" style="display: none;">
+                        Cargando pagos...
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Pago</th>
+                                <th>Cliente</th>
+                                <th>Monto</th>
+                                <th>Método</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pagos-table-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- Reservas Content -->
+                <div id="reservas-content" class="dashboard-content" style="display: none;">
+                    <div class="content-header-section">
+                        <h2>Gestión de reservas</h2>
+                        <button id="reservas-refresh-btn" class="refresh-btn" onclick="fetchReservas()">
+                            🔄 Actualizar
+                        </button>
+                    </div>
+                    <div id="reservas-error-message" class="error-message" style="display: none;"></div>
+                    <div id="reservas-loading-message" class="loading-message" style="display: none;">
+                        Cargando reservas...
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Reserva</th>
+                                <th>Cliente</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Personas</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reservas-table-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- Menú Content -->
+                <div id="menu-content" class="dashboard-content" style="display: none;">
+                    <div class="content-header-section">
+                        <h2>Menú del día</h2>
+                        <div style="display: flex; gap: 10px;">
+                            <button id="menu-refresh-btn" class="refresh-btn" onclick="fetchMenu()">
+                                🔄 Actualizar
+                            </button>
+                            <button class="refresh-btn" onclick="simulateNotFoundError()" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);">
+                                🚫 Test 404
+                            </button>
+                        </div>
+                    </div>
+                    <div id="menu-error-message" class="error-message" style="display: none;"></div>
+                    <div id="menu-loading-message" class="loading-message" style="display: none;">
+                        Cargando menú...
+                    </div>
+                    <div id="menu-items" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/empleado.js"></script>
+</body>
+</html>

@@ -1,13 +1,11 @@
 // Variables globales
 let usuarios = [];
-let chart = null;
 
 // Inicializar dashboard sin validación de usuario
 // Ahora el dashboard se abre siempre, sin importar el login
 
 document.addEventListener('DOMContentLoaded', function() {
     fetchUsuarios();
-    updateChart();
     initializeNavigation();
 });
 
@@ -168,7 +166,6 @@ async function fetchUsuarios() {
         
         renderUsuarios();
         updateStats();
-        updateChart();
     } catch (error) {
         console.error('Error:', error);
         if (errorMessage) {
@@ -224,46 +221,6 @@ function updateStats() {
     }
 }
 
-// Función para actualizar el gráfico
-function updateChart() {
-    const usuariosAdmin = usuarios.filter(u => u.tipo_usuario === 'administrador').length;
-    const usuariosCliente = usuarios.filter(u => u.tipo_usuario === 'cliente').length;
-
-    const canvas = document.getElementById('usuariosChart');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    
-    if (chart) {
-        chart.destroy();
-    }
-
-    chart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Administradores', 'Clientes'],
-            datasets: [{
-                data: [usuariosAdmin, usuariosCliente],
-                backgroundColor: ['#8B0000', '#FFD700'],
-                borderColor: ['#fff', '#fff'],
-                borderWidth: 2,
-            }],
-        },
-        options: {
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom',
-                    labels: {
-                        color: '#333',
-                        font: { size: 14 }
-                    }
-                }
-            }
-        }
-    });
-}
-
 // Función para manejar borrado de usuario
 function handleBorrarUsuario(id) {
     if (confirm(`¿Estás seguro de que quieres borrar el usuario con ID: ${id}?`)) {
@@ -282,4 +239,137 @@ function handleDesactivarUsuario(id) {
 function handleLogout() {
     localStorage.removeItem('user');
     window.location.href = 'login.html';
+}
+
+// Agrego el código JS para las nuevas gráficas
+const rococoRainbow = [
+  '#f6c1c7', '#fcd5ce', '#ffe5b4',
+  '#d0f4de', '#b8d0eb', '#cabbe9',
+  '#ffd6ec', '#e0c3fc'
+];
+
+function renderMiniBarChart() {
+  const ctx = document.getElementById('miniBarChart');
+  if (!ctx) return;
+  
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+      datasets: [{
+        label: 'Ventas',
+        data: [120, 180, 150, 220, 200, 280],
+        backgroundColor: rococoRainbow[0],
+        borderRadius: 4,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          titleColor: '#fff',
+          bodyColor: '#fff',
+          borderColor: rococoRainbow[0],
+          borderWidth: 1
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          display: false,
+          grid: { display: false }
+        },
+        x: {
+          display: false,
+          grid: { display: false }
+        }
+      },
+      elements: {
+        bar: { borderWidth: 0 }
+      }
+    }
+  });
+}
+
+function renderMiniPieChart() {
+  const ctx = document.getElementById('miniPieChart');
+  if (!ctx) return;
+  
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Rápida', 'Postres', 'Bebidas', 'Vegetariano'],
+      datasets: [{
+        data: [40, 25, 20, 15],
+        backgroundColor: rococoRainbow.slice(0, 4),
+        borderWidth: 0,
+        cutout: '60%'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          titleColor: '#fff',
+          bodyColor: '#fff',
+          callbacks: {
+            label: function(context) {
+              return context.label + ': ' + context.parsed + '%';
+            }
+          }
+        }
+      },
+      elements: {
+        arc: { borderWidth: 0 }
+      }
+    }
+  });
+}
+
+// Inicialización automática al cargar la página
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', () => {
+    renderMiniBarChart();
+    renderMiniPieChart();
+  });
+} else {
+  renderMiniBarChart();
+  renderMiniPieChart();
+}
+
+// Función para simular error del servidor (500)
+function simulateServerError() {
+    // Mostrar indicador de carga
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '⏳ Guardando...';
+    button.disabled = true;
+    
+    // Simular delay de procesamiento
+    setTimeout(() => {
+        // Simular error del servidor
+        const shouldError = Math.random() < 0.7; // 70% de probabilidad de error
+        
+        if (shouldError) {
+            // Redirigir a la página de error 500
+            window.location.href = '500.html';
+        } else {
+            // Simular éxito
+            button.innerHTML = '✅ ¡Guardado!';
+            button.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                button.style.background = 'linear-gradient(135deg, rgb(41, 216, 132) 0%, rgb(35, 185, 113) 100%)';
+            }, 2000);
+        }
+    }, 2000);
 } 
